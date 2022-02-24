@@ -1,0 +1,28 @@
+function y = fcn(u, data)
+%% Define Variables
+% Control Gains
+Kp=1.26;
+Ki=0.31;
+umax = 10;
+% Memory variables
+persistent I_past;
+persistent t_past;
+if isempty(I_past), I_past=0; end;
+if isempty(t_past), t_past=0; end;
+%% Calculate Controller output
+% sample time
+Ts = data - t_past;
+% Integrator
+I = I_past+u*Ts;
+% PI control calculation
+
+y = Kp*u+Ki*I;
+% anti-windup
+if abs(y)>umax,
+y = sign(y)*umax;
+u = sign(u)*min(umax/Kp, abs(u));
+I = (y-Kp*u)/Ki;
+end;
+I_past=I;
+t_past=data;
+y = y;
