@@ -92,7 +92,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     angleToObject = fieldView / 2 * ratio
     angleToObject = int(round(angleToObject, 2))
     # Convert to radians
-    angleToObject = angleToObject
+    angleToObject = angleToObject + 26
 
     # print("x"+str(x))
     # print("Ratio"+str(ratio))
@@ -108,14 +108,18 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         split[1] = (angleToObject << 8) >> 24
         split[2] = (angleToObject << 16) >> 24
         split[3] = (angleToObject << 24) >> 24
-        bus.write_i2c_block_data(4, 0, split) #write the given number to offset 0
-        read = bus.read_i2c_block_data(4, 0)
-        current_angle = (read[0] << 24) | (read[1] << 16) | (read[2] << 8) | read[3]
+        try:
+            bus.write_i2c_block_data(4, 0, split) #write the given number to offset 0
+            read = bus.read_i2c_block_data(4, 0, 4)
+            current_angle = (read[0] << 24) | (read[1] << 16) | (read[2] << 8) | read[3]
+        except IOError:
+            print("Failed to connect to I2C bus. Trying again\n")
         bus.close()
-        lcd.message = "Target: " + angleToObject + "\nPosition: " + current_angle
+        lcd.message = "Target: " + str(angleToObject) + "\nPosition: " + str(current_angle)
         
         
     
     key = cv.waitKey(1) & 0xFF
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
+
