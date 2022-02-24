@@ -86,13 +86,36 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # print the dimensions of the shape
     height = img.shape[0]
     width = img.shape[1]
-    fieldView = 52
-    center = width / 2
-    ratio = (center - x) / (width / 2)
-    angleToObject = fieldView / 2 * ratio
-    angleToObject = int(round(angleToObject, 2))
-    # Convert to radians
-    angleToObject = angleToObject + 26
+    
+    fieldViewX = 52
+    centerX = width / 2
+    ratioX = (center - x) / (width / 2)
+    angleToObjectX = fieldView / 2 * ratioX
+    angleToObjectX = int(round(angleToObjectX, 2))
+    # Now in range -26 : 26
+    angleToObjectX = angleToObjectX
+    
+    fieldViewY = 40
+    centerY = height / 2
+    ratioY = (center - y) / (height / 2)
+    angleToObjectY = fieldViewY / 2 * ratioY
+    angleToObjectY = int(round(angleToObjectY, 2))
+    # Now in range -20 : 20
+    angleToObjectY = angleToObjectY
+    
+    
+    if angleToObjectX > 0 and angleToObjectY > 0:
+        angleObject = 0
+    elif angleToObjectX < 0 and angleToObjectY > 0:
+        angleObject = 90
+    elif angleToObjectX < 0 and angleToObjectY > 0:
+        angleObject = 180
+    elif angleToObjectX < 0 and angleToObjectY > 0:
+        angleObject = 270
+    else: 
+        angleToObject = 400
+    
+    
 
     # print("x"+str(x))
     # print("Ratio"+str(ratio))
