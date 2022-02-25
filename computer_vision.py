@@ -27,6 +27,12 @@ lcd.color = [100, 0, 50] #make lcd a good color
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (640, 480)
+#low iso values have less noise but do ot work well in low light conditions low = 100 high = 400:800
+camera.iso = 100;
+
+camera.awb_mode = 'off'
+rg,bg = (0.9,1.9)
+camera.awb_gains = (rg,bg)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640, 480))
 # allow the camera to warmup
