@@ -89,31 +89,38 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     
     fieldViewX = 52
     centerX = width / 2
-    ratioX = (center - x) / (width / 2)
-    angleToObjectX = fieldView / 2 * ratioX
+    ratioX = (x - centerX) / (width / 2)
+    angleToObjectX = fieldViewX / 2 * ratioX
     angleToObjectX = int(round(angleToObjectX, 2))
     # Now in range -26 : 26
-    angleToObjectX = angleToObjectX
+    #angleToObjectX = angleToObjectX
     
     fieldViewY = 40
     centerY = height / 2
-    ratioY = (center - y) / (height / 2)
+    ratioY = (centerY - y) / (height / 2)
     angleToObjectY = fieldViewY / 2 * ratioY
     angleToObjectY = int(round(angleToObjectY, 2))
     # Now in range -20 : 20
-    angleToObjectY = angleToObjectY
+    #angleToObjectY = angleToObjectY
     
     
-    if angleToObjectX > 0 and angleToObjectY > 0:
-        angleObject = 0
-    elif angleToObjectX < 0 and angleToObjectY > 0:
-        angleObject = 90
-    elif angleToObjectX < 0 and angleToObjectY > 0:
-        angleObject = 180
-    elif angleToObjectX < 0 and angleToObjectY > 0:
-        angleObject = 270
+    print("Angle From CenterX" + str(angleToObjectX))
+    print("Angle From CenterY" + str(angleToObjectY))
+    
+    if ((angleToObjectX > 0) and (angleToObjectY > 0)):
+        angleToObject = 0
+        
+    elif ((angleToObjectX < 0) and (angleToObjectY > 0)):
+        angleToObject = 90
+        
+    elif ((angleToObjectX < 0) and (angleToObjectY < 0)):
+        angleToObject = 180
+        
+    elif ((angleToObjectX > 0) and (angleToObjectY < 0)):
+        angleToObject = 270
+        
     else: 
-        angleToObject = 400
+        angleToObject = 500
     
     
 
