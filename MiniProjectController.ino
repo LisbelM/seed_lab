@@ -1,11 +1,13 @@
 // This code implements a proportional-integral controller
 
 #include <Encoder.h>
-#include <stdlib.h>
+
 #include <Wire.h>
 
+#define ADDRESS 0x04
+
 byte data[32];
-char split[5];
+byte split[4];
 int write_to = 0;
 int read_len = 0;
 
@@ -16,8 +18,8 @@ int input_pin = 0;
 float ratio = 1;
 
 // Variables Kp and Ki allow for adjustment of PI control
-float Kp = 7;
-float Ki = 0.2;
+float Kp = 7.6;
+float Ki = 0.25;
 
 
 // Values for position and integral
@@ -74,17 +76,13 @@ void loop() {
     u = 7.5;
   }
   u = (255/7.5) * u;
-  analogWrite(9,u);
+  analogWrite(9,u);\
+  
 
-  Serial.print(current_position);
+
+  Serial.print((360/(2*pi))*requested_position);
   Serial.print("\t");
-  Serial.print(requested_position);
-  Serial.print("\t");
-  Serial.print(e);
-  Serial.print("\t");
-  Serial.print(I);
-  Serial.print("\t");
-  Serial.println(u);
+  Serial.println((360/(2*pi))*current_position);
   
   while (millis() < time_now + period) {
     // :)
@@ -92,20 +90,24 @@ void loop() {
 }
 
 void receive_data(int num_byte){
-  address = Wire.read(); //read the address as not to overwrite data on read
+  write_to  =   Wire.read( ) ; //read the address as not to overwrite data on read
  
-  while(Wire.available()){ //read while data is available
+  while ( Wire.available() ) { //read while data is available
     data[read_len] = Wire.read();
-    read_len++;
+    read_len ++ ;
   }
   read_len = 0;
   //reconcatenate the split byte back into 1  floating point number
-  requested_position = atof(data);
+  requested_position=((2*pi)/360)*((data[0]<<24)|(data[1 ]<<16)|(data[2]<< 8)|(data[3]));
   
 }
 
 void send_data(){
-  //Split up the angle into 4 bytes to be sent back to the pi
-  dtostrf(current_position, 4, 2, split)
+        //Split up the angle into 4 bytes to be sent back to the pi
+  long send_position = (long)(current_position*(360/(2*pi ) ) ) ;
+  split[0] = send_position >> 24;
+  split[1] = (send_position << 8) >> 24;
+  split[2] = (send_position << 16) >> 24;
+  split[3] = (send_position << 24) >> 24;
   Wire.write(split, 4); 
 }
