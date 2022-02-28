@@ -1,5 +1,5 @@
 # seed_lab
 EE Seed Lab Spring 2022
-This repository holds the code and other resources used for the SEED lab miniproject as well as the concurrent demos for the final project.
-\nThe folders are split up into the seperate demonstrations and subprojects for our group. 
-\nThe sub folders are split into the different languages as Python, Arduino and Matlab
+This repository holds the code and other resources used for the SEED lab miniproject as well as the concurrent demos for the final project.<br />
+The folders are split up into the seperate demonstrations and subprojects for our group. <br />
+The sub folders are split into the different languages as Python, Arduino and Matlab 
