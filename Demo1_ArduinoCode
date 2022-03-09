@@ -78,8 +78,8 @@ void loop() {
   time_now = millis();
 
   // read encoder data
-  current_angle[0] = wheel_L.read() * (pi/3200.0);
-  current_angle[1] = wheel_R.read() * (pi/3200.0);
+  current_angle[0] = wheel_L.read() * (2*pi/3200.0);
+  current_angle[1] = wheel_R.read() * (2*pi/3200.0);
 
   // calculate angular velocity of each wheel
   angular_velocity[0] = (current_angle[0] - old_angle[0]) / period;
