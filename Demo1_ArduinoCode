@@ -1,0 +1,137 @@
+// code for controlling a robot using a two layer control system
+// tune controllers using K values in define statements
+// robo_position_d and robo_angle_d are taken as inputs to the program
+
+#include <Encoder.h>
+
+#define pi 3.1415
+
+// fv: forward velocity   rv: rotational velocity
+#define K_fv 1
+#define K_rv 1
+
+// position K vals
+#define K_pp 1
+#define K_ip 1
+// angle K vals
+#define K_pa 1
+#define K_ia 1
+
+Encoder wheel_L(2,5);
+Encoder wheel_R(3,6);
+
+// angles of each wheel, read from encoder
+float current_angle[] = {0,0};
+float old_angle[] = {0,0};
+
+// angular velocity of each wheel
+float angular_velocity[] = {0,0};
+
+// instantaneous forward and rotational velocity of robot
+float forward_velocity = 0;
+float rotational_velocity = 0;
+// same as above, but desired values
+float forward_velocity_d = 0;
+float rotational_velocity_d = 0;
+
+// position and angle of robot
+float robo_position = 0;
+float robo_angle = 0;
+// same as above, but desired values
+float robo_position_d = 0;
+float robo_angle_d = 0;
+
+// error of forward and rotational velocity of robot
+float E_fv = 0;
+float E_rv = 0;
+
+// error and integral of position and angle of robot
+float E_position = 0;
+float I_position = 0;
+float E_angle = 0;
+float I_angle = 0;
+
+// voltages applied to wheel & voltages used for control
+float V_a[] = {0,0};
+float V_dif = 0;
+float V_avg = 0;
+
+// r: radius of wheel   d: diameter of robot wheelbase
+float r = 3.0;
+float d = 5.3;
+
+// flow control tools
+float time_now = 0;
+int period = 10;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(4,OUTPUT);
+  pinMode(7,OUTPUT);
+  pinMode(8,OUTPUT);
+  digitalWrite(4,HIGH);
+  // ily alex
+}
+
+void loop() {
+  time_now = millis();
+
+  // read encoder data
+  current_angle[0] = wheel_L.read() * (pi/3200.0);
+  current_angle[1] = wheel_R.read() * (pi/3200.0);
+
+  // calculate angular velocity of each wheel
+  angular_velocity[0] = (current_angle[0] - old_angle[0]) / period;
+  angular_velocity[1] = (current_angle[1] - old_angle[1]) / period;
+
+  // calculate forward and rotational velocity of robot
+  forward_velocity = r*(angular_velocity[0] + angular_velocity[1])/2;
+  rotational_velocity = r*(angular_velocity[0] - angular_velocity[1])/d;
+
+  // calculate current position and angle of robot
+  robo_position = r*(current_angle[0] + current_angle[1])/2;
+  robo_angle = r*(current_angle[0] - current_angle[1])/d;
+  
+  // calculate error and integral of position and angle
+  E_position = robo_position_d - robo_position;
+  I_position += E_position * (period/1000.0);
+  E_angle = robo_angle_d - robo_angle;
+  I_angle += E_angle * (period/1000.0);
+
+  // use PI control to get desired forward and rotational velocity
+  forward_velocity_d = K_pp * E_position + K_ip * I_position;
+  rotational_velocity_d = K_pa * E_angle + K_ia * I_angle
+
+  // calculate error in forward and rotational velocity
+  E_fv = forward_velocity_d - forward_velocity;
+  E_rv = rotational_velocity_d - rotational_velocity;
+
+  // find voltage to apply to each motor
+  V_avg = E_fv * K_fv;
+  V_dif = E_rv * K_rv;
+  V_a[0] = (V_avg + V_dif) / 2;
+  V_a[1] = (V_avg - V_dif) / 2;
+
+  // convert and send pwm for each motor
+  MotorControl(0);
+  MotorControl(1);
+
+  while (millis() < time_now + period) {
+    // :)
+  }
+}
+
+// function for sending voltage to motor as a pwm waveform
+void MotorControl(int wheelNum) {
+  if (V_a[wheelNum] > 0) {
+    digitalWrite(7+wheelNum,LOW);
+  } else {
+    digitalWrite(7+wheelNum,HIGH);
+    V_a[wheelNum] *= -1;
+  }
+  if (V_a[wheelNum] > 7.5) {
+    V_a[wheelNum] = 7.5;
+  }
+  analogWrite(9+wheelNum,(V_a[wheelNum] * (255/7.5)));
+}
