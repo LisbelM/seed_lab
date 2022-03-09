@@ -65,7 +65,6 @@ float time_now = 0;
 int period = 10;
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
   pinMode(4,OUTPUT);
   pinMode(7,OUTPUT);
@@ -78,12 +77,19 @@ void loop() {
   time_now = millis();
 
   // read encoder data
-  current_angle[0] = wheel_L.read() * (2*pi/3200.0);
+  current_angle[0] = -wheel_L.read() * (2*pi/3200.0);
   current_angle[1] = wheel_R.read() * (2*pi/3200.0);
 
   // calculate angular velocity of each wheel
-  angular_velocity[0] = (current_angle[0] - old_angle[0]) / period;
-  angular_velocity[1] = (current_angle[1] - old_angle[1]) / period;
+  angular_velocity[0] = (current_angle[0] - old_angle[0]) / (period/1000.0);
+  angular_velocity[1] = (current_angle[1] - old_angle[1]) / (period/1000.0);
+
+  Serial.print(angular_velocity[0]);
+  Serial.print("\t");
+  Serial.println(angular_velocity[1]);
+  
+  old_angle[0] = current_angle[0];
+  old_angle[1] = current_angle[1];
 
   // calculate forward and rotational velocity of robot
   forward_velocity = r*(angular_velocity[0] + angular_velocity[1])/2;
@@ -100,8 +106,8 @@ void loop() {
   I_angle += E_angle * (period/1000.0);
 
   // use PI control to get desired forward and rotational velocity
-  forward_velocity_d = K_pp * E_position + K_ip * I_position;
-  rotational_velocity_d = K_pa * E_angle + K_ia * I_angle;
+  //forward_velocity_d = K_pp * E_position + K_ip * I_position;
+  //rotational_velocity_d = K_pa * E_angle + K_ia * I_angle;
 
   // calculate error in forward and rotational velocity
   E_fv = forward_velocity_d - forward_velocity;
@@ -117,6 +123,8 @@ void loop() {
   MotorControl(0);
   MotorControl(1);
 
+
+
   while (millis() < time_now + period) {
     // :)
   }
@@ -125,13 +133,21 @@ void loop() {
 // function for sending voltage to motor as a pwm waveform
 void MotorControl(int wheelNum) {
   if (V_a[wheelNum] > 0) {
-    digitalWrite(7+wheelNum,LOW);
+    if (wheelNum) {
+      digitalWrite(7+wheelNum,LOW);
+    } else {
+      digitalWrite(7+wheelNum,HIGH);
+    }
   } else {
-    digitalWrite(7+wheelNum,HIGH);
     V_a[wheelNum] *= -1;
+    if (wheelNum) {
+      digitalWrite(7+wheelNum,HIGH);
+    } else {
+      digitalWrite(7+wheelNum,LOW);
+    }
   }
   if (V_a[wheelNum] > 7.5) {
     V_a[wheelNum] = 7.5;
   }
-  analogWrite(9+wheelNum,(V_a[wheelNum] * (255/7.5)));
+  analogWrite(9+wheelNum,(V_a[wheelNum] * (255.0/7.5)));
 }
