@@ -1,0 +1,38 @@
+#include <Encoder.h>
+
+Encoder wheel_L(2,5);
+Encoder wheel_R(3,6);
+
+float time_now = 0;
+int period = 10;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(4,OUTPUT);
+  digitalWrite(4,HIGH);
+  pinMode(7,OUTPUT);
+  pinMode(8,OUTPUT);
+
+  // change one of these to LOW to change movement mode
+  digitalWrite(7,HIGH);
+  digitalWrite(8,HIGH);
+
+  // set both motors to max (or not if this doesn't work well)
+  analogWrite(9,255);
+  analogWrite(10,255);
+  
+  // ily alex
+}
+
+void loop() {
+  time_now = millis();
+
+  Serial.print( wheel_L.read() * (2*pi/3200.0) );
+  Serial.print("\t");
+  Serial.print( wheel_R.read() * (2*pi/3200.0) );
+  Serial.print("\n");
+  
+  while (millis() < time_now + period) {
+    // :)
+  }
+}
