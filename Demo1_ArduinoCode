@@ -101,7 +101,7 @@ void loop() {
 
   // use PI control to get desired forward and rotational velocity
   forward_velocity_d = K_pp * E_position + K_ip * I_position;
-  rotational_velocity_d = K_pa * E_angle + K_ia * I_angle
+  rotational_velocity_d = K_pa * E_angle + K_ia * I_angle;
 
   // calculate error in forward and rotational velocity
   E_fv = forward_velocity_d - forward_velocity;
