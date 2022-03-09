@@ -3,6 +3,9 @@
 // robo_position_d and robo_angle_d are taken as inputs to the program
 
 #include <Encoder.h>
+#include <Wire.h>
+
+#define ADDRESS 0x04
 
 #define pi 3.1415
 
@@ -17,6 +20,8 @@
 #define K_pa 1
 #define K_ia 1
 
+int write_to;
+int increment_angle;
 Encoder wheel_L(2,5);
 Encoder wheel_R(3,6);
 
@@ -71,6 +76,10 @@ void setup() {
   pinMode(8,OUTPUT);
   digitalWrite(4,HIGH);
   // ily alex
+  
+  Wire.begin(ADDRESS); //define the send and receive functions for I2C comms
+  Wire.onRequest(send_data);
+  Wire.onReceive(receive_data);
 }
 
 void loop() {
@@ -150,4 +159,19 @@ void MotorControl(int wheelNum) {
     V_a[wheelNum] = 7.5;
   }
   analogWrite(9+wheelNum,(V_a[wheelNum] * (255.0/7.5)));
+}
+
+void receive_data(int num_byte){
+  write_to  =   Wire.read( ) ; //read the address as not to overwrite data on read
+ 
+  while ( Wire.available() ) { //read while data is available
+      increment_angle = Wire.read();
+  }
+  robo_angle_d = (((int)((((((float)increment_angle*0.21568627) - 27.0)*(pi/180.0))*100.0) + 0.5))/100.0);
+  
+  
+}
+
+void send_data(){
+      
 }
