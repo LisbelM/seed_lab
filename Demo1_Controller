@@ -15,10 +15,10 @@
 
 // position K vals
 #define K_pp 1
-#define K_ip 1
+#define K_dp 1
 // angle K vals
 #define K_pa 1
-#define K_ia 1
+#define K_da 1
 
 int write_to;
 int increment_angle;
@@ -50,11 +50,13 @@ float robo_angle_d = 0;
 float I_fv = 0;
 float I_rv = 0;
 
-// error and integral of position and angle of robot
+// error and derivative of position and angle of robot
 float E_position = 0;
-float I_position = 0;
+float E_position_old = 0;
+float D_position = 0;
 float E_angle = 0;
-float I_angle = 0;
+float E_angle_old = 0;
+float D_angle = 0;
 
 // voltages applied to wheel & voltages used for control
 float V_a[] = {0,0};
@@ -110,13 +112,16 @@ void loop() {
   
   // calculate error and integral of position and angle
   E_position = robo_position_d - robo_position;
-  I_position += E_position * (period/1000.0);
+  D_position = (E_position - E_position_old) / (period/1000.0);
   E_angle = robo_angle_d - robo_angle;
-  I_angle += E_angle * (period/1000.0);
+  D_angle = (E_angle - E_angle_old) / (period/1000.0);
+
+  E_position_old = E_position;
+  E_angle_old = E_angle;
 
   // use PI control to get desired forward and rotational velocity
-  //forward_velocity_d = K_pp * E_position + K_ip * I_position;
-  //rotational_velocity_d = K_pa * E_angle + K_ia * I_angle;
+  //forward_velocity_d = K_pp * E_position + K_dp * D_position;
+  //rotational_velocity_d = K_pa * E_angle + K_da * D_angle;
 
   // calculate error in forward and rotational velocity
   I_fv += (forward_velocity_d - forward_velocity) * (period/1000.0);
