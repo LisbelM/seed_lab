@@ -46,9 +46,9 @@ float robo_angle = 0;
 float robo_position_d = 0;
 float robo_angle_d = 0;
 
-// error of forward and rotational velocity of robot
-float E_fv = 0;
-float E_rv = 0;
+// integral of error for forward and rotational velocity of robot
+float I_fv = 0;
+float I_rv = 0;
 
 // error and integral of position and angle of robot
 float E_position = 0;
@@ -119,12 +119,12 @@ void loop() {
   //rotational_velocity_d = K_pa * E_angle + K_ia * I_angle;
 
   // calculate error in forward and rotational velocity
-  E_fv = forward_velocity_d - forward_velocity;
-  E_rv = rotational_velocity_d - rotational_velocity;
+  I_fv += (forward_velocity_d - forward_velocity) * (period/1000.0);
+  I_rv += (rotational_velocity_d - rotational_velocity) * (period/1000.0);
 
   // find voltage to apply to each motor
-  V_avg = E_fv * K_fv;
-  V_dif = E_rv * K_rv;
+  V_avg = I_fv * K_fv;
+  V_dif = I_rv * K_rv;
   V_a[0] = (V_avg + V_dif) / 2;
   V_a[1] = (V_avg - V_dif) / 2;
 
