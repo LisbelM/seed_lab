@@ -9,23 +9,24 @@
 
 #define pi 3.1415
 
-#define delay1 2000
+#define delay1 5000
 #define delay2 8000
-#define delay3 15000
+#define delay3 12000
 
 // fv: forward velocity   rv: rotational velocity
-#define K_fv 3.69
-#define K_rv 1.03
+#define K_fv 3.8
+#define K_rv 2
 
 // position K vals
-#define K_pp 0.5
+#define K_pp 0.55
 #define K_dp 0.2
 // angle K vals
-#define K_pa 1.6
-#define K_da 1
+#define K_pa 0.6
+#define K_da 0.3
 
-float pos = 3;
-float angle = -pi/2;
+// positive angle is 
+float pos = 7;
+float angle = 0;
 
 int write_to;
 int increment_angle;
@@ -78,7 +79,7 @@ float d = 5.3;
 float time_now = 0;
 int period = 10;
 
-int state = 2;
+int state = 1;
 
 void setup() {
   Serial.begin(9600);
@@ -98,15 +99,19 @@ void loop() {
 
   switch (state) {
     case 0:
-      robo_angle_d = 2*angle;
-      if (abs(E_angle) < 0.1 && millis() > delay2) {
+      robo_angle_d = 2*angle+0.1;
+      if (abs(E_angle) < 0.01 && millis() > delay2) {
         state = 1;
+        I_fv = 0;
+        I_rv = 0;
       }
     break;
     case 1:
-      robo_position_d = pos;
+      robo_position_d = pos+0.0;
       if (abs(E_position) < 0.1 && millis() > delay3) {
         state = 2;
+        I_fv = 0;
+        I_rv = 0;
       }
     break;
     case 2:
