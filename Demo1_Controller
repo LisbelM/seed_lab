@@ -9,16 +9,23 @@
 
 #define pi 3.1415
 
+#define delay1 2000
+#define delay2 8000
+#define delay3 15000
+
 // fv: forward velocity   rv: rotational velocity
-#define K_fv 1
-#define K_rv 1
+#define K_fv 3.69
+#define K_rv 1.03
 
 // position K vals
-#define K_pp 1
-#define K_dp 1
+#define K_pp 0.5
+#define K_dp 0.2
 // angle K vals
-#define K_pa 1
+#define K_pa 1.6
 #define K_da 1
+
+float pos = 3;
+float angle = -pi/2;
 
 int write_to;
 int increment_angle;
@@ -46,11 +53,11 @@ float robo_angle = 0;
 float robo_position_d = 0;
 float robo_angle_d = 0;
 
-// integral of error for forward and rotational velocity of robot
+// integral of error of forward and rotational velocity of robot
 float I_fv = 0;
 float I_rv = 0;
 
-// error and derivative of position and angle of robot
+// error and integral of position and angle of robot
 float E_position = 0;
 float E_position_old = 0;
 float D_position = 0;
@@ -71,6 +78,8 @@ float d = 5.3;
 float time_now = 0;
 int period = 10;
 
+int state = 2;
+
 void setup() {
   Serial.begin(9600);
   pinMode(4,OUTPUT);
@@ -87,6 +96,27 @@ void setup() {
 void loop() {
   time_now = millis();
 
+  switch (state) {
+    case 0:
+      robo_angle_d = 2*angle;
+      if (abs(E_angle) < 0.1 && millis() > delay2) {
+        state = 1;
+      }
+    break;
+    case 1:
+      robo_position_d = pos;
+      if (abs(E_position) < 0.1 && millis() > delay3) {
+        state = 2;
+      }
+    break;
+    case 2:
+      if (millis() < delay2 && millis() > delay1) {
+        state = 0;
+      }
+      // :)
+    break;
+  }
+
   // read encoder data
   current_angle[0] = -wheel_L.read() * (2*pi/3200.0);
   current_angle[1] = wheel_R.read() * (2*pi/3200.0);
@@ -94,21 +124,19 @@ void loop() {
   // calculate angular velocity of each wheel
   angular_velocity[0] = (current_angle[0] - old_angle[0]) / (period/1000.0);
   angular_velocity[1] = (current_angle[1] - old_angle[1]) / (period/1000.0);
-
-  Serial.print(angular_velocity[0]);
-  Serial.print("\t");
-  Serial.println(angular_velocity[1]);
   
   old_angle[0] = current_angle[0];
   old_angle[1] = current_angle[1];
 
   // calculate forward and rotational velocity of robot
-  forward_velocity = r*(angular_velocity[0] + angular_velocity[1])/2;
+  forward_velocity = r*(angular_velocity[0] + angular_velocity[1])/24;
   rotational_velocity = r*(angular_velocity[0] - angular_velocity[1])/d;
 
   // calculate current position and angle of robot
-  robo_position = r*(current_angle[0] + current_angle[1])/2;
-  robo_angle = r*(current_angle[0] - current_angle[1])/d;
+  robo_position += forward_velocity * (period/1000.0);
+  robo_angle += rotational_velocity * (period/1000.0);
+  //robo_position = r*(current_angle[0] + current_angle[1])/24;
+  //robo_angle = r*(current_angle[0] - current_angle[1])/d;
   
   // calculate error and integral of position and angle
   E_position = robo_position_d - robo_position;
@@ -120,8 +148,8 @@ void loop() {
   E_angle_old = E_angle;
 
   // use PI control to get desired forward and rotational velocity
-  //forward_velocity_d = K_pp * E_position + K_dp * D_position;
-  //rotational_velocity_d = K_pa * E_angle + K_da * D_angle;
+  forward_velocity_d = K_pp * E_position + K_dp * D_position;
+  rotational_velocity_d = K_pa * E_angle + K_da * D_angle;
 
   // calculate error in forward and rotational velocity
   I_fv += (forward_velocity_d - forward_velocity) * (period/1000.0);
@@ -136,8 +164,6 @@ void loop() {
   // convert and send pwm for each motor
   MotorControl(0);
   MotorControl(1);
-
-
 
   while (millis() < time_now + period) {
     // :)
