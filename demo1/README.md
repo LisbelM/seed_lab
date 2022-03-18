@@ -38,6 +38,7 @@ The code is divided by the language that it is written in and is organized as:
     <ul>
        <li>Adjusted Computer code to measure the angle from the center line</li>
        <li>Helped with construction of the physical bot</li>
+      <li>Helped to reposition the robot when doing tests for smoother reset</li>
     </ul>
   <li>Brook Walls</li>
     <ul>
