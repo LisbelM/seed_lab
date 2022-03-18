@@ -26,7 +26,7 @@ The code is divided by the language that it is written in and is organized as:
           <ul><li>Script that runs the PI controller simulink</li></ul>
         <li>run_steering_simulation.m</li>
           <ul><li>Runs the position model for tuning the controllers</li></ul>
-      
+    </ul>
   <li>Python</li>
     <ul>
       <li>demo1.py</li>
