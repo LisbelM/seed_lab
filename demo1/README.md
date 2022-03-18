@@ -12,18 +12,21 @@ The code is divided by the language that it is written in and is organized as:
     </ul>
   <li>Matlab</li>
     <ul>
-        <li>PIControlor</li>
-          <ul><li>Runs the PI controller simuation to generate Ki and Kp values</li></ul>
-        <li>PI_Controller.slx</li>
-          <ul><li>Simulink that allows tuning of the controller files</li></ul>
+        <li>PI_Turner.slx</li>
+          <ul><li>The inner loop transfer function models. Used to tune the inner loop controllers</li></ul>
+        <li>Position_model.slx</li>
+          <ul><li>The total simulink model used to tune the outer loop controller</li></ul>
+      <li>TransferFunctionCode.m</li>
+          <ul><li>The code that runs the inner loop PI controller tuning</li></ul>
         <li>Verifying a Discrete Time Controller Using Simulink </li>
           <ul><li>The function that simulates the motor for simulink experimental simulation</li></ul>
-        <li>project3_sim2 </li>
-          <ul><li>Allows comparison between simulated and experimental closed loop step response</li></ul>
+        <li>Transfer_Function_Sim.slx</li>
+          <ul><li>Simulink for the closed inner loop transfer functions</li></ul>
         <li>project2_matlabcode_7.m</li>
           <ul><li>Script that runs the PI controller simulink</li></ul>
-        <li>ClosedLoopCode.m</li>
-          <ul><li>Runs the simulink file "project3_sim2"</li></ul>
+        <li>run_steering_simulation.m</li>
+          <ul><li>Runs the position model for tuning the controllers</li></ul>
+      
     </ul>
   <li>Python</li>
     <ul>
