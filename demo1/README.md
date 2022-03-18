@@ -36,28 +36,33 @@ The code is divided by the language that it is written in and is organized as:
 <ul>
   <li>Jason Nguyen</li>
     <ul>
-       <li>Wrote the python code for computer vision and processing</li>
-       <li>Assisted in setting up the wheel system</li>
+       <li>Adjusted Computer code to measure the angle from the center line</li>
+       <li>Helped with construction of the physical bot</li>
     </ul>
   <li>Brook Walls</li>
     <ul>
-        <li>Designed experimental and simulated simulink PI controllers</li>
-        <li>Tuned controller gain values for Kp and Ki to meet system requirements</li>
+        <li>Experimentally determined the inner loop transfer functions</li>
+        <li>Constructed the Models for controller tuning</li>
+      <li>Assist with experimental tuning of the system</li>
     </ul>
   <li>Kevin Juneau</li>
     <ul>
-        <li>Implemented PI controller in arduino C</li>
-        <li>Experimentally determined motor step response and transfer function</li>
+        <li>Implemented inner and outer loop controllers in ArduinoC</li>
+        <li>Assisted with experimental determination of transfer functions</li>
+      <li>Did the main experimental tuning of the controller</li>
     </ul>
   <li>Lisbel Martinez</li>
     <ul>
         <li>Assisted in simulink modeling of the open loop and closed loop step responses</li>
         <li>Helped with testing of the subsytems working together for final demo</li>
+      <li>Helped with the physical assembly of the bot</li>
+      <li>Supported the tuning of the bot and writing of the main controller loop</li>
     </ul>
   <li>Alexander Nesbitt</li>
     <ul>
       <li>Completed wiring between Arduino UNO, LCD display and Rasberry Pi</li>
-      <li>Wrote python and arduino code to communicate the desired angle from the given quadrant of the camera</li>
-      <li>Assisted in integration of all subsystems into collaborated arduino and python docs
+      <li>Read documentation to determine the use of the motor shield and complete the wiring</li>
+      <li>Assisted in integration of all subsystems into collaborated arduino and python docs</li>
+      <li>Completed the main construction of the robot</li>
     </ul>
 </ul>
