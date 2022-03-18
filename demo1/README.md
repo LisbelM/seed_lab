@@ -5,8 +5,10 @@ The code is divided by the language that it is written in and is organized as:
 <ul>
   <li>Arduino</li>
     <ul>
-      <li>MiniProjectController.ino</li>
-      <ul><li>Contains the total arduino code that is setup to work with the h-bridge motor shield for the arduino and I2C pins on the arduino UNO. Additionally, the SDA, SCL and GND pins are connected the corresponding pins for the LCD screen</li></ul>
+      <li>Demo1_Controller.ino</li>
+      <ul><li>Contains the controllers for forward and angular velocity with the outer controller keeping track of the position of the robot.</li></ul>
+      <li>Demo1_StepResponse.ino</li>
+      <ul><li>The code used to obtain the experimental transfer functions for the inner loop of the controller.</li></ul>
     </ul>
   <li>Matlab</li>
     <ul>
