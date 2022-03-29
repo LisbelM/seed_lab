@@ -1,0 +1,189 @@
+// DEMO 2 CODE
+
+#include <Encoder.h>
+#include <Wire.h>
+
+#define ADDRESS 0x04
+
+#define pi 3.1415
+
+// fv: forward velocity   rv: rotational velocity
+#define K_fv 3.8
+#define K_rv 2
+
+// position K vals
+#define K_pp 0.55
+#define K_dp 0.2
+// angle K vals
+#define K_pa 0.6
+#define K_da 0.3
+
+#define SEARCH  0
+#define DRIVE   1
+#define STOP    2
+
+int state = SEARCH;
+
+int write_to;
+int increment_angle;
+Encoder wheel_L(2,5);
+Encoder wheel_R(3,6);
+
+// angles of each wheel, read from encoder
+float current_angle[] = {0,0};
+float old_angle[] = {0,0};
+
+// angular velocity of each wheel
+float angular_velocity[] = {0,0};
+
+// instantaneous forward and rotational velocity of robot
+float forward_velocity = 0;
+float rotational_velocity = 0;
+// same as above, but desired values
+float forward_velocity_d = 0;
+float rotational_velocity_d = 0;
+
+// position and angle of robot
+float robo_position = 0;
+float robo_angle = 0;
+// same as above, but desired values
+float robo_position_d = 0;
+float robo_angle_d = 0;
+
+// integral of error of forward and rotational velocity of robot
+float I_fv = 0;
+float I_rv = 0;
+
+// error and integral of position and angle of robot
+float E_position = 0;
+float E_position_old = 0;
+float D_position = 0;
+float E_angle = 0;
+float E_angle_old = 0;
+float D_angle = 0;
+
+// voltages applied to wheel & voltages used for control
+float V_a[] = {0,0};
+float V_dif = 0;
+float V_avg = 0;
+
+// r: radius of wheel   d: diameter of robot wheelbase
+float r = 3.0;
+float d = 5.3;
+
+// flow control tools
+float time_now = 0;
+int period = 10;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(4,OUTPUT);
+  pinMode(7,OUTPUT);
+  pinMode(8,OUTPUT);
+  digitalWrite(4,HIGH);
+  // ily alex
+  
+  Wire.begin(ADDRESS); //define the send and receive functions for I2C comms
+  Wire.onRequest(send_data);
+  Wire.onReceive(receive_data);
+}
+
+void loop() {
+  time_now = millis();
+
+  // read encoder data
+  current_angle[0] = -wheel_L.read() * (2*pi/3200.0);
+  current_angle[1] = wheel_R.read() * (2*pi/3200.0);
+
+  // calculate angular velocity of each wheel
+  angular_velocity[0] = (current_angle[0] - old_angle[0]) / (period/1000.0);
+  angular_velocity[1] = (current_angle[1] - old_angle[1]) / (period/1000.0);
+  
+  old_angle[0] = current_angle[0];
+  old_angle[1] = current_angle[1];
+
+  // calculate forward and rotational velocity of robot
+  forward_velocity = r*(angular_velocity[0] + angular_velocity[1])/24;
+  rotational_velocity = r*(angular_velocity[0] - angular_velocity[1])/d;
+
+  // calculate current position and angle of robot
+  robo_position += forward_velocity * (period/1000.0);
+  robo_angle += rotational_velocity * (period/1000.0);
+
+  switch (state) {
+    case SEARCH:
+      forward_velocity_d = 0;
+      rotational_velocity_d = pi/8;
+    break;
+
+    case DRIVE:
+      // calculate error and integral of position and angle
+      E_position = robo_position_d - robo_position;
+      D_position = (E_position - E_position_old) / (period/1000.0);
+      E_angle = robo_angle_d - robo_angle;
+      D_angle = (E_angle - E_angle_old) / (period/1000.0);
+
+      E_position_old = E_position;
+      E_angle_old = E_angle;
+
+      // use PI control to get desired forward and rotational velocity
+      forward_velocity_d = K_pp * E_position + K_dp * D_position;
+      rotational_velocity_d = K_pa * E_angle + K_da * D_angle;
+    break;
+
+    case STOP:
+      forward_velocity_d = 0;
+      rotational_velocity_d = 0;
+    break;
+  }
+
+  // calculate error in forward and rotational velocity
+  I_fv += (forward_velocity_d - forward_velocity) * (period/1000.0);
+  I_rv += (rotational_velocity_d - rotational_velocity) * (period/1000.0);
+
+  // find voltage to apply to each motor
+  V_avg = I_fv * K_fv;
+  V_dif = I_rv * K_rv;
+  V_a[0] = (V_avg + V_dif) / 2;
+  V_a[1] = (V_avg - V_dif) / 2;
+
+  // convert and send pwm for each motor
+  MotorControl(0);
+  MotorControl(1);
+
+  
+  while (millis() < time_now + period) {
+    // :)
+  }
+}
+
+// function for sending voltage to motor as a pwm waveform
+void MotorControl(int wheelNum) {
+  if (V_a[wheelNum] > 0) {
+    if (wheelNum) {
+      digitalWrite(7+wheelNum,LOW);
+    } else {
+      digitalWrite(7+wheelNum,HIGH);
+    }
+  } else {
+    V_a[wheelNum] *= -1;
+    if (wheelNum) {
+      digitalWrite(7+wheelNum,HIGH);
+    } else {
+      digitalWrite(7+wheelNum,LOW);
+    }
+  }
+  if (V_a[wheelNum] > 7.5) {
+    V_a[wheelNum] = 7.5;
+  }
+  analogWrite(9+wheelNum,(V_a[wheelNum] * (255.0/7.5)));
+}
+
+void receive_data(int num_byte){
+  write_to  =   Wire.read( ) ; //read the address as not to overwrite data on read
+ 
+  while ( Wire.available() ) { //read while data is available
+      increment_angle = Wire.read();
+  }
+  robo_angle_d = (((int)((((((float)increment_angle*0.21568627) - 27.0)*(pi/180.0))*100.0) + 0.5))/100.0);
+}
