@@ -184,6 +184,8 @@ void receive_data(int num_byte){
  
   while ( Wire.available() ) { //read while data is available
       increment_angle = Wire.read();
+      temp_dist = Wire.read();
   }
   robo_angle_d = (((int)((((((float)increment_angle*0.21568627) - 27.0)*(pi/180.0))*100.0) + 0.5))/100.0);
+  robo_position_d = (float)temp_dist/10.0;
 }
