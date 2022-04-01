@@ -1,2 +1,2 @@
-distance = int(distance * 10)
+distance = int((distance/12) * 10)
 bus.write_byte_data(ADDRESS, 0, distance)
