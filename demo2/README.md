@@ -5,10 +5,8 @@ The code is divided by the language that it is written in and is organized as:
 <ul>
   <li>Arduino</li>
     <ul>
-      <li>Demo1_Controller.ino</li>
-      <ul><li>Contains the controllers for forward and angular velocity with the outer controller keeping track of the position of the robot.</li></ul>
-      <li>Demo1_StepResponse.ino</li>
-      <ul><li>The code used to obtain the experimental transfer functions for the inner loop of the controller.</li></ul>
+      <li>Demo2_ArduinoCode</li>
+      <ul><li>Contains a state machine that runs the controller for demo2.</li></ul>
     </ul>
   <li>Matlab</li>
     <ul>
@@ -25,10 +23,8 @@ The code is divided by the language that it is written in and is organized as:
     </ul>
   <li>Python</li>
     <ul>
-      <li>demo1.py</li>
-        <ul><li>Computer Vision code that determines the angle from the center line of each frame by detecting blue painters tape. Addtionally, this code prints this angle to the LCD display for viewing.</li></ul>
-      <li>whitebalance</li>
-        <ul><li>This code implements white balance for the cameras although the final code uses the auto white balance from the cv2 library</li></ul>
+      <li>demo2.py</li>
+        <ul><li>The computer vision code that determines the angle from the center of the screen and transmits this to the rasberry pi so that it can determine how to correct its angular movement.</li></ul>
     </ul>
 </ul>
 
@@ -36,34 +32,29 @@ The code is divided by the language that it is written in and is organized as:
 <ul>
   <li>Jason Nguyen</li>
     <ul>
-       <li>Adjusted Computer code to measure the angle from the center line</li>
-       <li>Helped with construction of the physical bot</li>
-      <li>Helped to reposition the robot when doing tests for smoother reset</li>
+       <li>Added a bounding box that determines when the robot is at the tape.</li>
+       <li>Tuned the angle so that it is easier to send and doesn't send at top speed.</li>
+      <li>Helped design the angle conversion to make transmission simpler.</li>
     </ul>
   <li>Brook Walls</li>
     <ul>
-        <li>Experimentally determined the inner loop transfer functions</li>
-        <li>Constructed the Models for controller tuning</li>
-      <li>Assist with experimental tuning of the system</li>
+        <li>Helped with tuning of camera height with the physical construction</li>
+        <li>Helped with physical testing of the bot</li>
     </ul>
   <li>Kevin Juneau</li>
     <ul>
-        <li>Implemented inner and outer loop controllers in ArduinoC</li>
-        <li>Assisted with experimental determination of transfer functions</li>
-      <li>Did the main experimental tuning of the controller</li>
+        <li>Tweaked the demo 1 code to stop when the sending of data stops, as well as to following the tape precisely</li>
+      <li>Testing and tweaking of bot functioning</li>
     </ul>
   <li>Lisbel Martinez</li>
     <ul>
-        <li>Assisted in simulink modeling of the open loop and closed loop step responses</li>
-        <li>Helped with testing of the subsytems working together for final demo</li>
-      <li>Helped with the physical assembly of the bot</li>
-      <li>Supported the tuning of the bot and writing of the main controller loop</li>
+        <li>Helped with tweaking of the physical build</li>
+        <li>Brainstormed for the tweaking of the arduino code</li>
     </ul>
   <li>Alexander Nesbitt</li>
     <ul>
       <li>Completed wiring between Arduino UNO, LCD display and Rasberry Pi</li>
-      <li>Read documentation to determine the use of the motor shield and complete the wiring</li>
-      <li>Assisted in integration of all subsystems into collaborated arduino and python docs</li>
-      <li>Completed the main construction of the robot</li>
+      <li>Updated Github documtation</li>
+      <li>Repositioned Camera for a better angle</li>
     </ul>
 </ul>
