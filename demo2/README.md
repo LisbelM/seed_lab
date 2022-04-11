@@ -1,5 +1,5 @@
 
-# Mini Project 1
+# Mini Project 2
 ## File Organization
 The code is divided by the language that it is written in and is organized as:
 <ul>
