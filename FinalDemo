@@ -1,5 +1,4 @@
 // FINAL DEMO CODE
-// first try, I never miss
 
 #include <Encoder.h>
 #include <Wire.h>
@@ -8,18 +7,23 @@
 
 #define pi 3.1415
 
+// increase M -> increase forward speed while turning
+// decrease M -> decrease forward speed while turning
+int M = 30;
+float scale = 0;
+
 // distance from center of robot to camera view
-#define DISTANCE 0.78
+#define DISTANCE 0.4
 
 // fv: forward velocity   rv: rotational velocity
-#define K_fv 3.8
+#define K_fv 3.9
 #define K_rv 4
 
 // position K vals
-#define K_pp 1.5
+#define K_pp 2.3
 #define K_dp 0.7
 // angle K vals
-#define K_pa 1.5
+#define K_pa 2.5
 #define K_da 0.3
 
 #define SEARCH  0
@@ -31,7 +35,7 @@ int state = SEARCH;
 
 // flag, set when computer vision detects and sends new angle data
 int flag = 0;
-int cross = 0;
+int cross = 0; 
 
 int write_to;
 int increment_angle;
@@ -84,7 +88,8 @@ float d = 5.3;
 
 // flow control tools
 float time_now = 0;
-int period = 10;
+float period = 10;
+float full_distance = 0;
 
 // party tools
 int turn_counter = 0;
@@ -133,6 +138,21 @@ void loop() {
   robo_position += forward_velocity * (period/1000.0);
   robo_angle += rotational_velocity * (period/1000.0);
 
+  full_distance += forward_velocity * period / 1000;
+  if (cross) {
+    robo_position_d = DISTANCE + 1;
+  }
+  if (full_distance > 25) {
+    M = 10;
+  }
+  //if (full_distnace > 27) {cross = 1;}
+  //if (full_distance >= 26.77) {
+  //  Serial.println("stop time :3");
+  //  //cross = 1;
+  //} else {
+  //  Serial.println(full_distance);
+  //}
+  
   switch (state) {
 
     case SEARCH:
@@ -144,7 +164,7 @@ void loop() {
     break;
 
     case DRIVE:
-      if (flag) {
+      if (flag && !cross) {
         robo_position = 0;
         robo_angle = 0;
         flag = 0;
@@ -157,18 +177,19 @@ void loop() {
       E_position_old = E_position;
       E_angle_old = E_angle;
       // use PI control to get desired forward and rotational velocity
-      forward_velocity_d = K_pp * E_position + K_dp * D_position;
+      scale = (M / (robo_angle_d * robo_angle_d * 3283 + M));
+      forward_velocity_d = (K_pp * E_position + K_dp * D_position)*scale;
       rotational_velocity_d = K_pa * E_angle + K_da * D_angle;
-      if (E_position == 0) {
+      if (E_position < 0.1) {
         state = STOP;
       }
     break;
 
     case STOP:
-      forward_velocity_d = 0;
-      rotational_velocity_d = 0;
       if (cross) {
-        state = PARTY;
+        forward_velocity_d = 0;
+        rotational_velocity_d = 0;
+        //state = PARTY;
       } else {
         state = SEARCH;
       }
@@ -177,10 +198,12 @@ void loop() {
     case PARTY:
       // turn back and forth
       if (turn_counter > 50) {
-        robo_angle_d = -pi/2;
+        forward_velocity_d = 0;
+        rotational_velocity_d = -pi/2;
         turn_counter = 0;
       } else {
-        robo_angle_d = pi/2;
+        forward_velocity_d = 0;
+        rotational_velocity_d = pi/2;
         turn_counter++;
       }
 
@@ -237,6 +260,16 @@ void loop() {
   V_a[0] = (V_avg + V_dif) / 2;
   V_a[1] = (V_avg - V_dif) / 2;
 
+  if (V_a[0] > 7.5 || V_a[1] > 7.5) {
+    if (V_a[0] > V_a[1]) {
+      V_a[1] = V_a[1]/V_a[0] * 7.5;
+      V_a[0] = 7.5;
+    } else {
+      V_a[0] = V_a[0]/V_a[1] * 7.5;
+      V_a[1] = 7.5;
+    }
+  }
+
   // convert and send pwm for each motor
   MotorControl(0);
   MotorControl(1);
@@ -262,9 +295,6 @@ void MotorControl(int wheelNum) {
       digitalWrite(7+wheelNum,LOW);
     }
   }
-  if (V_a[wheelNum] > 7.5) {
-    V_a[wheelNum] = 7.5;
-  }
   analogWrite(9+wheelNum,(V_a[wheelNum] * (255.0/7.5)));
 }
 
@@ -273,6 +303,7 @@ void receive_data(int num_byte){
  
   while ( Wire.available() ) { //read while data is available
       increment_angle = Wire.read();
+      cross = Wire.read() * (full_distance > 26);
   }
   robo_angle_d = (((int)((((((float)increment_angle*0.21568627) - 27.0)*(pi/180.0))*100.0) + 0.5))/100.0);
 }
