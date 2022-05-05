@@ -140,7 +140,7 @@ void loop() {
 
   full_distance += forward_velocity * period / 1000;
   if (cross) {
-    robo_position_d = DISTANCE + 1;
+    robo_position_d = DISTANCE + 1.2;
   }
   if (full_distance > 25) {
     M = 10;
